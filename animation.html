@@ -2,65 +2,75 @@
 <html>
 
 <head>
-  <meta charset="utf-8">
-  <link rel="stylesheet" href="style.css">
-  <style type="text/css">
-    #brick {
-      width: 40px;
-      height: 20px;
-      background: #EE6B47;
-      position: relative;
-      cursor: pointer;
-  }
-
-  #path {
-      outline: 1px solid #E8C48E;
-      width: 540px;
-      height: 20px;
-  }
-</style>
+	<meta charset="utf-8">
+	<style type="text/css">
+		body {
+			width: 100%;
+			height: 100%;
+		}
+		#path {
+			outline: 1px solid #E8C48E;
+			width: 75%;
+			height: 20px;
+		}
+		#brick {
+			width: 5%;
+			height: 20px;
+			background: #EE6B47;
+			position: relative;
+			cursor: pointer;
+		}
+	</style>
 </head>
 
 <body>
 
 
-  <div id="path">
-    <div id="brick"></div>
-</div>
+	<div id="path">
+		<div id="brick"></div>
+	</div>
+	<br/>
+	<input type="number" id="speed" min="100" value="2000">
 
-<script>
-    brick.onclick = function() {
-        animate({
-            duration: 5000,
-            timing: function circ(timeFraction) {
-                return 1 - Math.sin(Math.acos(timeFraction))
-            },
-            draw: function(progress) {
-                brick.style.left = progress * 500 + 'px';
-            }
-        });
-    };
+	<script>
+		brick.onclick = function() {
+			var offset = parseInt(getComputedStyle(brick.parentNode).width) - parseInt(getComputedStyle(brick).width);
+			animate({
+				duration: Number(document.getElementById('speed').value),
+				timing: makeEaseInOut(quad),
+				draw: function(progress) {
+					brick.style.left = offset * progress + 'px';
+				}
+			});
+		};
 
-    function animate(options) {
-        var start = performance.now();
+		function quad (progress) {
+			return Math.pow(progress, 2);
+		}
 
-        requestAnimationFrame(function animate(time) {
-            // timeFraction от 0 до 1
-            var timeFraction = (time - start) / options.duration;
-            if (timeFraction > 1) timeFraction = 1;
-
-            // текущее состояние анимации
-            var progress = options.timing(timeFraction)
-
-            options.draw(progress);
-            if (timeFraction < 1) {
-                requestAnimationFrame(animate);
-            }
-        });
-    }
-</script>
+		function makeEaseInOut(timing) {
+			return function(timeFraction) {
+				if (timeFraction < .5)
+					return timing(2 * timeFraction) / 2;
+				else
+					return (2 - timing(2 * (1 - timeFraction))) / 2;
+			}
+		}
 
 
+		function animate(options) {
+			var start = performance.now();
+			requestAnimationFrame(function animate(time) {
+				var timeFraction = (time - start) / options.duration;
+				if (timeFraction > 1) { timeFraction = 1; }
+				var progress = options.timing(timeFraction)
+				options.draw(progress);
+				if (timeFraction < 1) {
+					requestAnimationFrame(animate);
+				}
+			});
+		}
+	</script>
 </body>
 
 </html>
